@@ -1,0 +1,29 @@
+version: '3.8'
+
+services:
+  db:
+    image: mysql:8.0
+    container_name: inventory_db
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: inventory
+      MYSQL_USER: inventory_user
+      MYSQL_PASSWORD: inventory_password
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - db_data:/var/lib/mysql
+
+  backend:
+    image: tomcat:9.0-jre8
+    container_name: inventory_backend
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./backend/target/inventory-backend.war:/usr/local/tomcat/webapps/inventory.war:ro
+    depends_on:
+      - db
+
+volumes:
+  db_data:
