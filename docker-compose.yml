@@ -25,5 +25,25 @@ services:
     depends_on:
       - db
 
+  frontend:
+    image: eclipse-temurin:8-jre
+    container_name: inventory_frontend
+    hostname: cachyos-x8664
+    ipc: host
+    environment:
+      - DISPLAY=${DISPLAY}
+      - BACKEND_HOST=backend
+      - XAUTHORITY=/tmp/xauth
+      - _JAVA_AWT_WM_NONREPARENTING=1
+    volumes:
+      - /tmp/.X11-unix:/tmp/.X11-unix:rw
+      - ${XAUTHORITY:-/tmp/null}:/tmp/xauth:ro
+      - ./frontend/target:/app/target:ro
+    working_dir: /app
+    command: >
+      sh -c "apt-get update && apt-get install -y libxext6 libxrender1 libxtst6 libxi6 libx11-6 fontconfig && java -Djava.awt.headless=false -jar target/inventory-frontend-1.0-SNAPSHOT.jar"
+    depends_on:
+      - backend
+
 volumes:
   db_data:

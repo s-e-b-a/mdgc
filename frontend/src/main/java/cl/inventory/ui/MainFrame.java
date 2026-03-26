@@ -40,19 +40,44 @@ public class MainFrame extends JXFrame {
 
     public MainFrame() {
         super("Slam's Video Game Inventory", true);
+        try { UIManager.setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName()); } catch (Exception e){}
         setSize(1100, 800);
         setLocationRelativeTo(null);
-        initService();
         initComponents();
-        loadData();
+
+        new SwingWorker<Void, Void>() {
+            @Override
+            protected Void doInBackground() throws Exception {
+                initService();
+                // We add a small delay to allow Tomcat to finish starting without spamming it.
+                // Normally wait-for-it script is used, but this works purely in Java.
+                if (service == null) {
+                    for (int i = 0; i < 5; i++) {
+                        System.out.println("Retrying connection to backend...");
+                        Thread.sleep(3000);
+                        initService();
+                        if (service != null) break;
+                    }
+                }
+                return null;
+            }
+            @Override
+            protected void done() {
+                loadData();
+            }
+        }.execute();
     }
     
     private void initService() {
         try {
-            URL url = new URL("http://localhost:8080/inventory/ws/inventory?wsdl");
+            String bHost = System.getenv("BACKEND_HOST");
+            if (bHost == null || bHost.trim().isEmpty()) bHost = "localhost";
+            URL url = new URL("http://" + bHost + ":8080/inventory/ws/inventory?wsdl");
             QName qname = new QName("http://service.inventory.cl/", "InventoryServiceImplService");
             Service wsService = Service.create(url, qname);
             service = wsService.getPort(InventoryService.class);
+            javax.xml.ws.BindingProvider bp = (javax.xml.ws.BindingProvider) service;
+            bp.getRequestContext().put(javax.xml.ws.BindingProvider.ENDPOINT_ADDRESS_PROPERTY, "http://" + bHost + ":8080/inventory/ws/inventory");
         } catch (Exception e) {
             e.printStackTrace();
             System.err.println("Backend is not ready yet, working in offline mode.");
@@ -290,8 +315,7 @@ public class MainFrame extends JXFrame {
         });
         
         add(tabbedPane, BorderLayout.CENTER);
-        
-        try { UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName()); } catch (Exception e){}
+        // L&F has been moved to constructor
     }
     
     private void loadData() {
