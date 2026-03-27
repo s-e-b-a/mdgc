@@ -16,7 +16,7 @@ services:
       - db_data:/var/lib/mysql
 
   backend:
-    image: tomcat:9.0-jre8
+    image: tomcat:10.1-jre21
     container_name: inventory_backend
     ports:
       - "8080:8080"
