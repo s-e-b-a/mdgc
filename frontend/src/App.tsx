@@ -1,18 +1,28 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { createBrowserRouter, Navigate, RouterProvider } from 'react-router-dom';
+import AppLayout from '@/layouts/AppLayout';
+import DashboardPage from '@/pages/DashboardPage';
+import VideoGamesPage from '@/pages/VideoGamesPage';
+import PlatformsPage from '@/pages/PlatformsPage';
+import HardwarePage from '@/pages/HardwarePage';
+import AccessoriesPage from '@/pages/AccessoriesPage';
+
+const router = createBrowserRouter([
+  {
+    path: '/',
+    element: <AppLayout />,
+    children: [
+      { index: true, element: <Navigate to="/dashboard" replace /> },
+      { path: 'dashboard', element: <DashboardPage /> },
+      { path: 'videogames', element: <VideoGamesPage /> },
+      { path: 'platforms', element: <PlatformsPage /> },
+      { path: 'hardware', element: <HardwarePage /> },
+      { path: 'accessories', element: <AccessoriesPage /> },
+    ],
+  },
+]);
 
 function App() {
-  return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<Navigate to="/dashboard" replace />} />
-        <Route path="/dashboard" element={<div>Dashboard</div>} />
-        <Route path="/videogames" element={<div>Video Games</div>} />
-        <Route path="/platforms" element={<div>Platforms</div>} />
-        <Route path="/hardware" element={<div>Hardware</div>} />
-        <Route path="/accessories" element={<div>Accessories</div>} />
-      </Routes>
-    </BrowserRouter>
-  )
+  return <RouterProvider router={router} />;
 }
 
-export default App
+export default App;
