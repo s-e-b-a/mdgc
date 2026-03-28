@@ -25,11 +25,12 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import PlatformDialog from '@/components/PlatformDialog';
+import type { ApiError } from '@/types';
 import { cn } from '@/lib/utils';
 import { Plus, Pencil, Trash2, RefreshCw } from 'lucide-react';
 
 export default function PlatformsPage() {
-  const { data: platforms, isLoading, refetch } = usePlatforms();
+  const { data: platforms, isLoading, isError, error, refetch } = usePlatforms();
   const addMutation = useAddPlatform();
   const updateMutation = useUpdatePlatform();
   const deleteMutation = useDeletePlatform();
@@ -73,6 +74,10 @@ export default function PlatformsPage() {
             setPlatformDialogOpen(false);
             resetPlatformSelection();
           },
+          onError: (err) => {
+            const apiErr = (err as Error & { apiError?: ApiError }).apiError;
+            setPlatformErrorDialog(true, apiErr?.message ?? 'Failed to update platform.');
+          },
         }
       );
     } else {
@@ -81,6 +86,10 @@ export default function PlatformsPage() {
         {
           onSuccess: () => {
             setPlatformDialogOpen(false);
+          },
+          onError: (err) => {
+            const apiErr = (err as Error & { apiError?: ApiError }).apiError;
+            setPlatformErrorDialog(true, apiErr?.message ?? 'Failed to add platform.');
           },
         }
       );
@@ -94,9 +103,13 @@ export default function PlatformsPage() {
         setPlatformDeleteDialogOpen(false);
         resetPlatformSelection();
       },
-      onError: () => {
+      onError: (err) => {
+        const apiErr = (err as Error & { apiError?: ApiError }).apiError;
         setPlatformDeleteDialogOpen(false);
-        setPlatformErrorDialog(true, 'Ensure no games/hardware are linked to it.');
+        setPlatformErrorDialog(
+          true,
+          apiErr?.message ?? 'Ensure no games/hardware are linked to it.'
+        );
       },
     });
   };
@@ -138,6 +151,10 @@ export default function PlatformsPage() {
       {/* Table */}
       {isLoading ? (
         <p className="text-muted-foreground">Loading platforms...</p>
+      ) : isError ? (
+        <p className="text-destructive">
+          {(error as Error & { apiError?: ApiError })?.apiError?.message ?? 'Failed to load platforms.'}
+        </p>
       ) : (
         <div className="rounded-md border">
           <Table>

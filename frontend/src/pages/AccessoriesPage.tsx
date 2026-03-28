@@ -25,12 +25,12 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import AccessoryFormDialog from '@/components/AccessoryFormDialog';
-import type { IAccessory } from '@/types';
+import type { IAccessory, ApiError } from '@/types';
 import { cn } from '@/lib/utils';
 import { Plus, Pencil, Trash2, RefreshCw } from 'lucide-react';
 
 export default function AccessoriesPage() {
-  const { data: accessories, isLoading, refetch } = useAccessories();
+  const { data: accessories, isLoading, isError, error, refetch } = useAccessories();
   const addMutation = useAddAccessory();
   const updateMutation = useUpdateAccessory();
   const deleteMutation = useDeleteAccessory();
@@ -71,12 +71,20 @@ export default function AccessoriesPage() {
             setAccessoryFormDialogOpen(false);
             resetAccessorySelection();
           },
+          onError: (err) => {
+            const apiErr = (err as Error & { apiError?: ApiError }).apiError;
+            console.error('Update failed:', apiErr?.message ?? err.message);
+          },
         }
       );
     } else {
       addMutation.mutate(data, {
         onSuccess: () => {
           setAccessoryFormDialogOpen(false);
+        },
+        onError: (err) => {
+          const apiErr = (err as Error & { apiError?: ApiError }).apiError;
+          console.error('Add failed:', apiErr?.message ?? err.message);
         },
       });
     }
@@ -88,6 +96,10 @@ export default function AccessoriesPage() {
       onSuccess: () => {
         setAccessoryDeleteDialogOpen(false);
         resetAccessorySelection();
+      },
+      onError: (err) => {
+        const apiErr = (err as Error & { apiError?: ApiError }).apiError;
+        console.error('Delete failed:', apiErr?.message ?? err.message);
       },
     });
   };
@@ -129,6 +141,10 @@ export default function AccessoriesPage() {
       {/* Table */}
       {isLoading ? (
         <p className="text-muted-foreground">Loading accessories...</p>
+      ) : isError ? (
+        <p className="text-destructive">
+          {(error as Error & { apiError?: ApiError })?.apiError?.message ?? 'Failed to load accessories.'}
+        </p>
       ) : (
         <div className="rounded-md border">
           <Table>

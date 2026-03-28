@@ -26,12 +26,12 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import GameFormDialog from '@/components/GameFormDialog';
-import type { IVideoGame } from '@/types';
+import type { IVideoGame, ApiError } from '@/types';
 import { cn } from '@/lib/utils';
 import { Plus, Pencil, Trash2, RefreshCw } from 'lucide-react';
 
 export default function VideoGamesPage() {
-  const { data: games, isLoading, refetch } = useVideoGames();
+  const { data: games, isLoading, isError, error, refetch } = useVideoGames();
   const { data: platforms } = usePlatforms();
   const addMutation = useAddVideoGame();
   const updateMutation = useUpdateVideoGame();
@@ -80,12 +80,20 @@ export default function VideoGamesPage() {
             setGameFormDialogOpen(false);
             resetGameSelection();
           },
+          onError: (err) => {
+            const apiErr = (err as Error & { apiError?: ApiError }).apiError;
+            console.error('Update failed:', apiErr?.message ?? err.message);
+          },
         }
       );
     } else {
       addMutation.mutate(payload, {
         onSuccess: () => {
           setGameFormDialogOpen(false);
+        },
+        onError: (err) => {
+          const apiErr = (err as Error & { apiError?: ApiError }).apiError;
+          console.error('Add failed:', apiErr?.message ?? err.message);
         },
       });
     }
@@ -97,6 +105,10 @@ export default function VideoGamesPage() {
       onSuccess: () => {
         setGameDeleteDialogOpen(false);
         resetGameSelection();
+      },
+      onError: (err) => {
+        const apiErr = (err as Error & { apiError?: ApiError }).apiError;
+        console.error('Delete failed:', apiErr?.message ?? err.message);
       },
     });
   };
@@ -138,6 +150,10 @@ export default function VideoGamesPage() {
       {/* Table */}
       {isLoading ? (
         <p className="text-muted-foreground">Loading video games...</p>
+      ) : isError ? (
+        <p className="text-destructive">
+          {(error as Error & { apiError?: ApiError })?.apiError?.message ?? 'Failed to load video games.'}
+        </p>
       ) : (
         <div className="rounded-md border">
           <Table>

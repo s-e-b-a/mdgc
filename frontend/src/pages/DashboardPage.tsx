@@ -1,4 +1,5 @@
 import { useStatistics } from '@/hooks/useStatistics';
+import type { ApiError } from '@/types';
 import {
   Card,
   CardContent,
@@ -16,7 +17,7 @@ import {
 import { Gamepad2, Monitor, Headphones, DollarSign } from 'lucide-react';
 
 export default function DashboardPage() {
-  const { data: stats, isLoading, isError } = useStatistics();
+  const { data: stats, isLoading, isError, error } = useStatistics();
 
   if (isLoading) {
     return (
@@ -28,10 +29,12 @@ export default function DashboardPage() {
   }
 
   if (isError || !stats) {
+    const apiError = (error as Error & { apiError?: ApiError })?.apiError;
+    const errorMessage = apiError?.message ?? 'Could not fetch stats.';
     return (
       <div>
         <h2 className="text-2xl font-bold tracking-tight mb-4">Dashboard</h2>
-        <p className="text-destructive">Could not fetch stats.</p>
+        <p className="text-destructive">{errorMessage}</p>
       </div>
     );
   }

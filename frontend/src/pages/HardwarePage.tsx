@@ -26,12 +26,12 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import ConsoleFormDialog from '@/components/ConsoleFormDialog';
-import type { IConsole } from '@/types';
+import type { IConsole, ApiError } from '@/types';
 import { cn } from '@/lib/utils';
 import { Plus, Pencil, Trash2, RefreshCw } from 'lucide-react';
 
 export default function HardwarePage() {
-  const { data: consoles, isLoading, refetch } = useConsoles();
+  const { data: consoles, isLoading, isError, error, refetch } = useConsoles();
   const { data: platforms } = usePlatforms();
   const addMutation = useAddConsole();
   const updateMutation = useUpdateConsole();
@@ -80,12 +80,20 @@ export default function HardwarePage() {
             setHardwareFormDialogOpen(false);
             resetHardwareSelection();
           },
+          onError: (err) => {
+            const apiErr = (err as Error & { apiError?: ApiError }).apiError;
+            console.error('Update failed:', apiErr?.message ?? err.message);
+          },
         }
       );
     } else {
       addMutation.mutate(payload, {
         onSuccess: () => {
           setHardwareFormDialogOpen(false);
+        },
+        onError: (err) => {
+          const apiErr = (err as Error & { apiError?: ApiError }).apiError;
+          console.error('Add failed:', apiErr?.message ?? err.message);
         },
       });
     }
@@ -97,6 +105,10 @@ export default function HardwarePage() {
       onSuccess: () => {
         setHardwareDeleteDialogOpen(false);
         resetHardwareSelection();
+      },
+      onError: (err) => {
+        const apiErr = (err as Error & { apiError?: ApiError }).apiError;
+        console.error('Delete failed:', apiErr?.message ?? err.message);
       },
     });
   };
@@ -138,6 +150,10 @@ export default function HardwarePage() {
       {/* Table */}
       {isLoading ? (
         <p className="text-muted-foreground">Loading consoles...</p>
+      ) : isError ? (
+        <p className="text-destructive">
+          {(error as Error & { apiError?: ApiError })?.apiError?.message ?? 'Failed to load consoles.'}
+        </p>
       ) : (
         <div className="rounded-md border">
           <Table>
