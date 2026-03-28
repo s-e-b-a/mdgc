@@ -1,1 +1,1 @@
-{"root":["./src/App.tsx","./src/main.tsx","./src/vite-env.d.ts","./src/lib/utils.ts"],"version":"5.7.3"}
+{"root":["./src/App.tsx","./src/main.tsx","./src/vite-env.d.ts","./src/hooks/useAccessories.ts","./src/hooks/useConsoles.ts","./src/hooks/usePlatforms.ts","./src/hooks/useStatistics.ts","./src/hooks/useVideoGames.ts","./src/lib/api.ts","./src/lib/utils.ts","./src/types/index.ts"],"version":"5.7.3"}
