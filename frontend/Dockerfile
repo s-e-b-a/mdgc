@@ -1,4 +1,4 @@
-FROM eclipse-temurin:8-jre
+FROM eclipse-temurin:21-jre
 
 RUN apt-get update && apt-get install -y \
     libxext6 \
