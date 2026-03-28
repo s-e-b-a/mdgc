@@ -2,6 +2,7 @@ import express from 'express';
 import platformRoutes from './routes/platformRoutes.js';
 import videoGameRoutes from './routes/videoGameRoutes.js';
 import consoleRoutes from './routes/consoleRoutes.js';
+import accessoryRoutes from './routes/accessoryRoutes.js';
 
 /**
  * Express application setup.
@@ -19,5 +20,6 @@ app.use(express.urlencoded({ extended: true }));
 app.use('/api/platforms', platformRoutes);
 app.use('/api/videogames', videoGameRoutes);
 app.use('/api/consoles', consoleRoutes);
+app.use('/api/accessories', accessoryRoutes);
 
 export default app;
