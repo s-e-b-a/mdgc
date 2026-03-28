@@ -1,0 +1,7 @@
+{
+    "codeRepositoryPath": "./backend",
+    "transformationName": "AWS/application-modernization",
+    "buildCommand": "mvn clean package",
+    "validationCommands": "mvn test",
+    "additionalPlanContext": "Completely remake this backend application from Java 21 to Node.js 22. Replace the current Java implementation with a Node.js 22 backend using TypeScript. Convert all existing SOAP services, Java web services, controllers, servlets, and endpoints into REST APIs. Use Express or NestJS if appropriate. Preserve all existing business rules, validation, authentication, authorization, database access, and response formats. Generate a clean layered architecture with controllers, services, repositories, DTOs, middleware, configuration, and environment variable support. Add OpenAPI/Swagger documentation. Add unit tests and integration tests. Generate a Dockerfile for Node.js 22 and package.json scripts. If the application uses JDBC, JPA, Hibernate, or Spring Data, convert that persistence layer to an equivalent Node.js implementation using Prisma, TypeORM, or Sequelize. Preserve the existing database schema. Replace Java-specific concepts such as dependency injection, filters, exceptions, threads, and scheduled jobs with Node.js equivalents."
+}

@@ -1,0 +1,7 @@
+{
+    "codeRepositoryPath": "./frontend",
+    "transformationName": "AWS/application-modernization",
+    "buildCommand": "mvn clean package",
+    "validationCommands": "mvn test",
+    "additionalPlanContext": "Completely remake this Java 21 Swing desktop application into a modern React frontend. Replace the entire Swing UI with React using TypeScript, Tailwind CSS, and shadcn/ui components. Preserve all screens, forms, menus, workflows, dialogs, tables, validations, and business logic currently implemented in Swing. Convert all windows, JFrame, JPanel, JTable, modal dialogs, tabs, and menu bars into equivalent React pages and reusable components. Use a responsive layout that works both on desktop and mobile. Use React Router for navigation, React Query or equivalent for API calls, and Zustand or Context for state management. Generate a modern folder structure with pages, components, hooks, services, and layouts. Replace desktop event handling with modern React patterns. Preserve all validations and user flows. Generate a complete Vite or Next.js project configured with Tailwind and shadcn/ui. If the current application has tables or grids, replace them with modern searchable and sortable data tables. If there are desktop forms, convert them into responsive forms with validation. Generate package.json, Dockerfile, build scripts, and README."
+}

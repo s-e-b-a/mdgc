@@ -1,4 +1,5 @@
 import express from 'express';
+import cors from 'cors';
 import swaggerUi from 'swagger-ui-express';
 import platformRoutes from './routes/platformRoutes.js';
 import videoGameRoutes from './routes/videoGameRoutes.js';
@@ -13,7 +14,14 @@ import { swaggerSpec } from './config/swagger.js';
  * Configures JSON body parsing, registers route handlers, Swagger UI, and error middleware.
  */
 const app = express();
+app.use(cors({
+    origin: ['http://localhost', 'http://localhost:5173'],
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization']
+}));
 
+app.options('*', cors());
 // Parse JSON request bodies
 app.use(express.json());
 
@@ -29,7 +37,6 @@ app.use('/api/videogames', videoGameRoutes);
 app.use('/api/consoles', consoleRoutes);
 app.use('/api/accessories', accessoryRoutes);
 app.use('/api', statisticsRoutes);
-
 // Error handling middleware (must be registered last)
 app.use(notFoundHandler);
 app.use(errorHandler);
