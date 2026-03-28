@@ -4,7 +4,7 @@ import {
   addVideoGame,
   updateVideoGame,
   deleteVideoGame,
-} from '@/lib/api';
+} from '@/lib/apiClient';
 import type { IVideoGame } from '@/types';
 
 const VIDEO_GAMES_KEY = ['videoGames'] as const;

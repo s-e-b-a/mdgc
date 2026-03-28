@@ -4,7 +4,7 @@ import {
   addPlatform,
   updatePlatform,
   deletePlatform,
-} from '@/lib/api';
+} from '@/lib/apiClient';
 import type { IPlatform } from '@/types';
 
 const PLATFORMS_KEY = ['platforms'] as const;

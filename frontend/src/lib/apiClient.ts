@@ -3,11 +3,20 @@ import type {
   IVideoGame,
   IConsole,
   IAccessory,
+  ApiError,
+  CollectionValue,
+  PingResponse,
   StatisticsReport,
 } from '@/types';
 
 const BASE_URL = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:3000/api';
 
+/**
+ * Centralized REST API request helper.
+ * Parses JSON error responses and throws typed errors that include the HTTP
+ * status code and the { error, message } fields from the backend's ApiError
+ * response shape.
+ */
 async function request<T>(endpoint: string, options?: RequestInit): Promise<T> {
   const response = await fetch(`${BASE_URL}${endpoint}`, {
     headers: {
@@ -17,8 +26,23 @@ async function request<T>(endpoint: string, options?: RequestInit): Promise<T> {
   });
 
   if (!response.ok) {
-    const errorText = await response.text().catch(() => 'Unknown error');
-    throw new Error(`API Error ${response.status}: ${errorText}`);
+    let apiError: ApiError;
+    try {
+      apiError = (await response.json()) as ApiError;
+    } catch {
+      apiError = {
+        error: `HTTP ${response.status}`,
+        message: response.statusText || 'Unknown error',
+      };
+    }
+
+    const err = new Error(apiError.message) as Error & {
+      status: number;
+      apiError: ApiError;
+    };
+    err.status = response.status;
+    err.apiError = apiError;
+    throw err;
   }
 
   // Handle 204 No Content
@@ -56,8 +80,8 @@ export function deleteVideoGame(id: number): Promise<void> {
   return request<void>(`/videogames/${id}`, { method: 'DELETE' });
 }
 
-export function getTotalCollectionValue(): Promise<number> {
-  return request<number>('/videogames/value');
+export function getTotalCollectionValue(): Promise<CollectionValue> {
+  return request<CollectionValue>('/videogames/collection-value');
 }
 
 // ── Platforms ────────────────────────────────────────────────────────────────
@@ -145,4 +169,10 @@ export function deleteAccessory(id: number): Promise<void> {
 
 export function getStatisticsReport(): Promise<StatisticsReport> {
   return request<StatisticsReport>('/statistics');
+}
+
+// ── Ping ─────────────────────────────────────────────────────────────────────
+
+export function ping(): Promise<PingResponse> {
+  return request<PingResponse>('/ping');
 }

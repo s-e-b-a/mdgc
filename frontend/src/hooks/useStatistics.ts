@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { getStatisticsReport } from '@/lib/api';
+import { getStatisticsReport } from '@/lib/apiClient';
 
 const STATISTICS_KEY = ['statistics'] as const;
 

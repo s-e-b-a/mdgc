@@ -4,7 +4,7 @@ import {
   addConsole,
   updateConsole,
   deleteConsole,
-} from '@/lib/api';
+} from '@/lib/apiClient';
 import type { IConsole } from '@/types';
 
 const CONSOLES_KEY = ['consoles'] as const;

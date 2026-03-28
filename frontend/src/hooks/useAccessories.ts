@@ -4,7 +4,7 @@ import {
   addAccessory,
   updateAccessory,
   deleteAccessory,
-} from '@/lib/api';
+} from '@/lib/apiClient';
 import type { IAccessory } from '@/types';
 
 const ACCESSORIES_KEY = ['accessories'] as const;
