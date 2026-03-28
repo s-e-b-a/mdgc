@@ -1,10 +1,10 @@
-import { useState } from 'react';
 import {
   useAccessories,
   useAddAccessory,
   useUpdateAccessory,
   useDeleteAccessory,
 } from '@/hooks/useAccessories';
+import { useInventoryStore } from '@/stores/useInventoryStore';
 import { Button } from '@/components/ui/button';
 import {
   Table,
@@ -25,7 +25,7 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import AccessoryFormDialog from '@/components/AccessoryFormDialog';
-import type { Accessory } from '@/types';
+import type { IAccessory } from '@/types';
 import { cn } from '@/lib/utils';
 import { Plus, Pencil, Trash2, RefreshCw } from 'lucide-react';
 
@@ -35,39 +35,48 @@ export default function AccessoriesPage() {
   const updateMutation = useUpdateAccessory();
   const deleteMutation = useDeleteAccessory();
 
-  const [selectedAccessory, setSelectedAccessory] = useState<Accessory | null>(
-    null
-  );
-  const [formDialogOpen, setFormDialogOpen] = useState(false);
-  const [editMode, setEditMode] = useState(false);
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  // Zustand store state & actions
+  const {
+    selectedAccessory,
+    formDialogOpen,
+    editMode,
+    deleteDialogOpen,
+  } = useInventoryStore((s) => s.accessories);
+
+  const {
+    setSelectedAccessory,
+    setAccessoryFormDialogOpen,
+    setAccessoryEditMode,
+    setAccessoryDeleteDialogOpen,
+    resetAccessorySelection,
+  } = useInventoryStore();
 
   const handleAdd = () => {
-    setEditMode(false);
-    setFormDialogOpen(true);
+    setAccessoryEditMode(false);
+    setAccessoryFormDialogOpen(true);
   };
 
   const handleEdit = () => {
     if (!selectedAccessory) return;
-    setEditMode(true);
-    setFormDialogOpen(true);
+    setAccessoryEditMode(true);
+    setAccessoryFormDialogOpen(true);
   };
 
-  const handleSave = (data: Omit<Accessory, 'id'>) => {
+  const handleSave = (data: Omit<IAccessory, 'id'>) => {
     if (editMode && selectedAccessory) {
       updateMutation.mutate(
         { id: selectedAccessory.id, data },
         {
           onSuccess: () => {
-            setFormDialogOpen(false);
-            setSelectedAccessory(null);
+            setAccessoryFormDialogOpen(false);
+            resetAccessorySelection();
           },
         }
       );
     } else {
       addMutation.mutate(data, {
         onSuccess: () => {
-          setFormDialogOpen(false);
+          setAccessoryFormDialogOpen(false);
         },
       });
     }
@@ -77,8 +86,8 @@ export default function AccessoriesPage() {
     if (!selectedAccessory) return;
     deleteMutation.mutate(selectedAccessory.id, {
       onSuccess: () => {
-        setDeleteDialogOpen(false);
-        setSelectedAccessory(null);
+        setAccessoryDeleteDialogOpen(false);
+        resetAccessorySelection();
       },
     });
   };
@@ -110,7 +119,7 @@ export default function AccessoriesPage() {
           variant="destructive"
           size="sm"
           disabled={!selectedAccessory}
-          onClick={() => setDeleteDialogOpen(true)}
+          onClick={() => setAccessoryDeleteDialogOpen(true)}
         >
           <Trash2 className="h-4 w-4" />
           Delete Accessory
@@ -173,13 +182,13 @@ export default function AccessoriesPage() {
       {/* Accessory Form Dialog */}
       <AccessoryFormDialog
         open={formDialogOpen}
-        onOpenChange={setFormDialogOpen}
+        onOpenChange={setAccessoryFormDialogOpen}
         onSave={handleSave}
         accessory={editMode ? selectedAccessory : null}
       />
 
       {/* Delete Confirmation */}
-      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setAccessoryDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Confirm</AlertDialogTitle>

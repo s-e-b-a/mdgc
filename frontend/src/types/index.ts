@@ -1,11 +1,11 @@
 // TypeScript interfaces matching the backend models
 
-export interface Platform {
+export interface IPlatform {
   id: number;
   name: string;
 }
 
-export interface VideoGame {
+export interface IVideoGame {
   id: number;
   title: string;
   platformId: number;
@@ -19,7 +19,7 @@ export interface VideoGame {
   playState: string | null;
 }
 
-export interface Console {
+export interface IConsole {
   id: number;
   platformId: number | null;
   platformName: string | null;
@@ -31,11 +31,34 @@ export interface Console {
   includedCables: string | null;
 }
 
-export interface Accessory {
+export interface IAccessory {
   id: number;
   type: string;
   brand: string | null;
   connectivity: string | null;
+}
+
+export interface ILoan {
+  id: number;
+  itemType: string;
+  itemId: number;
+  borrowerName: string;
+  loanDate: string;
+  returnDate: string | null;
+  status: string;
+}
+
+export interface ApiError {
+  error: string;
+  message: string;
+}
+
+export interface CollectionValue {
+  value: number;
+}
+
+export interface PingResponse {
+  message: string;
 }
 
 export interface StatisticsReport {

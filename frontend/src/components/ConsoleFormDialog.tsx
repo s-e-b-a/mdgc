@@ -17,16 +17,16 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import type { Console, Platform } from '@/types';
+import type { IConsole, IPlatform } from '@/types';
 
 const STATUS_OPTIONS = ['Functional', 'Needs Repair', 'Broken', 'Display Only'];
 
 interface ConsoleFormDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onSave: (data: Omit<Console, 'id' | 'platformName'>) => void;
-  console?: Console | null;
-  platforms: Platform[];
+  onSave: (data: Omit<IConsole, 'id' | 'platformName'>) => void;
+  console?: IConsole | null;
+  platforms: IPlatform[];
 }
 
 export default function ConsoleFormDialog({

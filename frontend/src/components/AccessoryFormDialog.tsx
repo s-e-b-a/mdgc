@@ -17,7 +17,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import type { Accessory } from '@/types';
+import type { IAccessory } from '@/types';
 
 const CONNECTIVITY_OPTIONS = [
   'Wired',
@@ -30,8 +30,8 @@ const CONNECTIVITY_OPTIONS = [
 interface AccessoryFormDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onSave: (data: Omit<Accessory, 'id'>) => void;
-  accessory?: Accessory | null;
+  onSave: (data: Omit<IAccessory, 'id'>) => void;
+  accessory?: IAccessory | null;
 }
 
 export default function AccessoryFormDialog({

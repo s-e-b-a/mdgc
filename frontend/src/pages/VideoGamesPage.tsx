@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import {
   useVideoGames,
   useAddVideoGame,
@@ -6,6 +5,7 @@ import {
   useDeleteVideoGame,
 } from '@/hooks/useVideoGames';
 import { usePlatforms } from '@/hooks/usePlatforms';
+import { useInventoryStore } from '@/stores/useInventoryStore';
 import { Button } from '@/components/ui/button';
 import {
   Table,
@@ -26,7 +26,7 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import GameFormDialog from '@/components/GameFormDialog';
-import type { VideoGame } from '@/types';
+import type { IVideoGame } from '@/types';
 import { cn } from '@/lib/utils';
 import { Plus, Pencil, Trash2, RefreshCw } from 'lucide-react';
 
@@ -37,43 +37,55 @@ export default function VideoGamesPage() {
   const updateMutation = useUpdateVideoGame();
   const deleteMutation = useDeleteVideoGame();
 
-  const [selectedGame, setSelectedGame] = useState<VideoGame | null>(null);
-  const [formDialogOpen, setFormDialogOpen] = useState(false);
-  const [editMode, setEditMode] = useState(false);
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [noPlatformDialogOpen, setNoPlatformDialogOpen] = useState(false);
+  // Zustand store state & actions
+  const {
+    selectedGame,
+    formDialogOpen,
+    editMode,
+    deleteDialogOpen,
+    noPlatformDialogOpen,
+  } = useInventoryStore((s) => s.videoGames);
+
+  const {
+    setSelectedGame,
+    setGameFormDialogOpen,
+    setGameEditMode,
+    setGameDeleteDialogOpen,
+    setGameNoPlatformDialogOpen,
+    resetGameSelection,
+  } = useInventoryStore();
 
   const handleAdd = () => {
     if (!platforms || platforms.length === 0) {
-      setNoPlatformDialogOpen(true);
+      setGameNoPlatformDialogOpen(true);
       return;
     }
-    setEditMode(false);
-    setFormDialogOpen(true);
+    setGameEditMode(false);
+    setGameFormDialogOpen(true);
   };
 
   const handleEdit = () => {
     if (!selectedGame) return;
-    setEditMode(true);
-    setFormDialogOpen(true);
+    setGameEditMode(true);
+    setGameFormDialogOpen(true);
   };
 
-  const handleSave = (data: Omit<VideoGame, 'id' | 'platform'>) => {
+  const handleSave = (data: Omit<IVideoGame, 'id' | 'platform'>) => {
     const payload = { ...data, platform: null };
     if (editMode && selectedGame) {
       updateMutation.mutate(
         { id: selectedGame.id, data: payload },
         {
           onSuccess: () => {
-            setFormDialogOpen(false);
-            setSelectedGame(null);
+            setGameFormDialogOpen(false);
+            resetGameSelection();
           },
         }
       );
     } else {
       addMutation.mutate(payload, {
         onSuccess: () => {
-          setFormDialogOpen(false);
+          setGameFormDialogOpen(false);
         },
       });
     }
@@ -83,8 +95,8 @@ export default function VideoGamesPage() {
     if (!selectedGame) return;
     deleteMutation.mutate(selectedGame.id, {
       onSuccess: () => {
-        setDeleteDialogOpen(false);
-        setSelectedGame(null);
+        setGameDeleteDialogOpen(false);
+        resetGameSelection();
       },
     });
   };
@@ -116,7 +128,7 @@ export default function VideoGamesPage() {
           variant="destructive"
           size="sm"
           disabled={!selectedGame}
-          onClick={() => setDeleteDialogOpen(true)}
+          onClick={() => setGameDeleteDialogOpen(true)}
         >
           <Trash2 className="h-4 w-4" />
           Delete Game
@@ -181,14 +193,14 @@ export default function VideoGamesPage() {
       {/* Game Form Dialog */}
       <GameFormDialog
         open={formDialogOpen}
-        onOpenChange={setFormDialogOpen}
+        onOpenChange={setGameFormDialogOpen}
         onSave={handleSave}
         game={editMode ? selectedGame : null}
         platforms={platforms ?? []}
       />
 
       {/* Delete Confirmation */}
-      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setGameDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Confirm</AlertDialogTitle>
@@ -208,7 +220,7 @@ export default function VideoGamesPage() {
       {/* No Platform Warning */}
       <AlertDialog
         open={noPlatformDialogOpen}
-        onOpenChange={setNoPlatformDialogOpen}
+        onOpenChange={setGameNoPlatformDialogOpen}
       >
         <AlertDialogContent>
           <AlertDialogHeader>
@@ -219,7 +231,7 @@ export default function VideoGamesPage() {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogAction
-              onClick={() => setNoPlatformDialogOpen(false)}
+              onClick={() => setGameNoPlatformDialogOpen(false)}
             >
               OK
             </AlertDialogAction>

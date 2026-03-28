@@ -5,7 +5,7 @@ import {
   updateConsole,
   deleteConsole,
 } from '@/lib/api';
-import type { Console } from '@/types';
+import type { IConsole } from '@/types';
 
 const CONSOLES_KEY = ['consoles'] as const;
 
@@ -19,7 +19,7 @@ export function useConsoles() {
 export function useAddConsole() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (data: Omit<Console, 'id'>) => addConsole(data),
+    mutationFn: (data: Omit<IConsole, 'id'>) => addConsole(data),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: CONSOLES_KEY });
     },
@@ -29,7 +29,7 @@ export function useAddConsole() {
 export function useUpdateConsole() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, data }: { id: number; data: Partial<Console> }) =>
+    mutationFn: ({ id, data }: { id: number; data: Partial<IConsole> }) =>
       updateConsole(id, data),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: CONSOLES_KEY });

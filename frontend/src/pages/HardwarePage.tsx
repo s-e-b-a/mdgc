@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import {
   useConsoles,
   useAddConsole,
@@ -6,6 +5,7 @@ import {
   useDeleteConsole,
 } from '@/hooks/useConsoles';
 import { usePlatforms } from '@/hooks/usePlatforms';
+import { useInventoryStore } from '@/stores/useInventoryStore';
 import { Button } from '@/components/ui/button';
 import {
   Table,
@@ -26,7 +26,7 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import ConsoleFormDialog from '@/components/ConsoleFormDialog';
-import type { Console } from '@/types';
+import type { IConsole } from '@/types';
 import { cn } from '@/lib/utils';
 import { Plus, Pencil, Trash2, RefreshCw } from 'lucide-react';
 
@@ -37,43 +37,55 @@ export default function HardwarePage() {
   const updateMutation = useUpdateConsole();
   const deleteMutation = useDeleteConsole();
 
-  const [selectedConsole, setSelectedConsole] = useState<Console | null>(null);
-  const [formDialogOpen, setFormDialogOpen] = useState(false);
-  const [editMode, setEditMode] = useState(false);
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [noPlatformDialogOpen, setNoPlatformDialogOpen] = useState(false);
+  // Zustand store state & actions
+  const {
+    selectedConsole,
+    formDialogOpen,
+    editMode,
+    deleteDialogOpen,
+    noPlatformDialogOpen,
+  } = useInventoryStore((s) => s.hardware);
+
+  const {
+    setSelectedConsole,
+    setHardwareFormDialogOpen,
+    setHardwareEditMode,
+    setHardwareDeleteDialogOpen,
+    setHardwareNoPlatformDialogOpen,
+    resetHardwareSelection,
+  } = useInventoryStore();
 
   const handleAdd = () => {
     if (!platforms || platforms.length === 0) {
-      setNoPlatformDialogOpen(true);
+      setHardwareNoPlatformDialogOpen(true);
       return;
     }
-    setEditMode(false);
-    setFormDialogOpen(true);
+    setHardwareEditMode(false);
+    setHardwareFormDialogOpen(true);
   };
 
   const handleEdit = () => {
     if (!selectedConsole) return;
-    setEditMode(true);
-    setFormDialogOpen(true);
+    setHardwareEditMode(true);
+    setHardwareFormDialogOpen(true);
   };
 
-  const handleSave = (data: Omit<Console, 'id' | 'platformName'>) => {
+  const handleSave = (data: Omit<IConsole, 'id' | 'platformName'>) => {
     const payload = { ...data, platformName: null };
     if (editMode && selectedConsole) {
       updateMutation.mutate(
         { id: selectedConsole.id, data: payload },
         {
           onSuccess: () => {
-            setFormDialogOpen(false);
-            setSelectedConsole(null);
+            setHardwareFormDialogOpen(false);
+            resetHardwareSelection();
           },
         }
       );
     } else {
       addMutation.mutate(payload, {
         onSuccess: () => {
-          setFormDialogOpen(false);
+          setHardwareFormDialogOpen(false);
         },
       });
     }
@@ -83,8 +95,8 @@ export default function HardwarePage() {
     if (!selectedConsole) return;
     deleteMutation.mutate(selectedConsole.id, {
       onSuccess: () => {
-        setDeleteDialogOpen(false);
-        setSelectedConsole(null);
+        setHardwareDeleteDialogOpen(false);
+        resetHardwareSelection();
       },
     });
   };
@@ -116,7 +128,7 @@ export default function HardwarePage() {
           variant="destructive"
           size="sm"
           disabled={!selectedConsole}
-          onClick={() => setDeleteDialogOpen(true)}
+          onClick={() => setHardwareDeleteDialogOpen(true)}
         >
           <Trash2 className="h-4 w-4" />
           Delete Hardware
@@ -187,14 +199,14 @@ export default function HardwarePage() {
       {/* Console Form Dialog */}
       <ConsoleFormDialog
         open={formDialogOpen}
-        onOpenChange={setFormDialogOpen}
+        onOpenChange={setHardwareFormDialogOpen}
         onSave={handleSave}
         console={editMode ? selectedConsole : null}
         platforms={platforms ?? []}
       />
 
       {/* Delete Confirmation */}
-      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setHardwareDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Confirm</AlertDialogTitle>
@@ -214,7 +226,7 @@ export default function HardwarePage() {
       {/* No Platform Warning */}
       <AlertDialog
         open={noPlatformDialogOpen}
-        onOpenChange={setNoPlatformDialogOpen}
+        onOpenChange={setHardwareNoPlatformDialogOpen}
       >
         <AlertDialogContent>
           <AlertDialogHeader>
@@ -225,7 +237,7 @@ export default function HardwarePage() {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogAction
-              onClick={() => setNoPlatformDialogOpen(false)}
+              onClick={() => setHardwareNoPlatformDialogOpen(false)}
             >
               OK
             </AlertDialogAction>

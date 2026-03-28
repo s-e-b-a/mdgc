@@ -17,7 +17,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import type { VideoGame, Platform } from '@/types';
+import type { IVideoGame, IPlatform } from '@/types';
 
 const FORMAT_OPTIONS = ['Physical', 'Digital'];
 const COMPLETENESS_OPTIONS = [
@@ -38,9 +38,9 @@ const PLAY_STATE_OPTIONS = [
 interface GameFormDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onSave: (game: Omit<VideoGame, 'id' | 'platform'>) => void;
-  game?: VideoGame | null;
-  platforms: Platform[];
+  onSave: (game: Omit<IVideoGame, 'id' | 'platform'>) => void;
+  game?: IVideoGame | null;
+  platforms: IPlatform[];
 }
 
 export default function GameFormDialog({

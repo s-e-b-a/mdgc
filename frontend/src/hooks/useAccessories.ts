@@ -5,7 +5,7 @@ import {
   updateAccessory,
   deleteAccessory,
 } from '@/lib/api';
-import type { Accessory } from '@/types';
+import type { IAccessory } from '@/types';
 
 const ACCESSORIES_KEY = ['accessories'] as const;
 
@@ -19,7 +19,7 @@ export function useAccessories() {
 export function useAddAccessory() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (data: Omit<Accessory, 'id'>) => addAccessory(data),
+    mutationFn: (data: Omit<IAccessory, 'id'>) => addAccessory(data),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ACCESSORIES_KEY });
     },
@@ -29,7 +29,7 @@ export function useAddAccessory() {
 export function useUpdateAccessory() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, data }: { id: number; data: Partial<Accessory> }) =>
+    mutationFn: ({ id, data }: { id: number; data: Partial<IAccessory> }) =>
       updateAccessory(id, data),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ACCESSORIES_KEY });

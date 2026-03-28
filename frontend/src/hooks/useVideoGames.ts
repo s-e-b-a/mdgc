@@ -5,7 +5,7 @@ import {
   updateVideoGame,
   deleteVideoGame,
 } from '@/lib/api';
-import type { VideoGame } from '@/types';
+import type { IVideoGame } from '@/types';
 
 const VIDEO_GAMES_KEY = ['videoGames'] as const;
 
@@ -19,7 +19,7 @@ export function useVideoGames() {
 export function useAddVideoGame() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (data: Omit<VideoGame, 'id'>) => addVideoGame(data),
+    mutationFn: (data: Omit<IVideoGame, 'id'>) => addVideoGame(data),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: VIDEO_GAMES_KEY });
     },
@@ -29,7 +29,7 @@ export function useAddVideoGame() {
 export function useUpdateVideoGame() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, data }: { id: number; data: Partial<VideoGame> }) =>
+    mutationFn: ({ id, data }: { id: number; data: Partial<IVideoGame> }) =>
       updateVideoGame(id, data),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: VIDEO_GAMES_KEY });

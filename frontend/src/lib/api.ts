@@ -1,8 +1,8 @@
 import type {
-  Platform,
-  VideoGame,
-  Console,
-  Accessory,
+  IPlatform,
+  IVideoGame,
+  IConsole,
+  IAccessory,
   StatisticsReport,
 } from '@/types';
 
@@ -31,12 +31,12 @@ async function request<T>(endpoint: string, options?: RequestInit): Promise<T> {
 
 // ── Video Games ──────────────────────────────────────────────────────────────
 
-export function getAllVideoGames(): Promise<VideoGame[]> {
-  return request<VideoGame[]>('/videogames');
+export function getAllVideoGames(): Promise<IVideoGame[]> {
+  return request<IVideoGame[]>('/videogames');
 }
 
-export function addVideoGame(data: Omit<VideoGame, 'id'>): Promise<VideoGame> {
-  return request<VideoGame>('/videogames', {
+export function addVideoGame(data: Omit<IVideoGame, 'id'>): Promise<IVideoGame> {
+  return request<IVideoGame>('/videogames', {
     method: 'POST',
     body: JSON.stringify(data),
   });
@@ -44,9 +44,9 @@ export function addVideoGame(data: Omit<VideoGame, 'id'>): Promise<VideoGame> {
 
 export function updateVideoGame(
   id: number,
-  data: Partial<VideoGame>,
-): Promise<VideoGame> {
-  return request<VideoGame>(`/videogames/${id}`, {
+  data: Partial<IVideoGame>,
+): Promise<IVideoGame> {
+  return request<IVideoGame>(`/videogames/${id}`, {
     method: 'PUT',
     body: JSON.stringify(data),
   });
@@ -62,12 +62,12 @@ export function getTotalCollectionValue(): Promise<number> {
 
 // ── Platforms ────────────────────────────────────────────────────────────────
 
-export function getAllPlatforms(): Promise<Platform[]> {
-  return request<Platform[]>('/platforms');
+export function getAllPlatforms(): Promise<IPlatform[]> {
+  return request<IPlatform[]>('/platforms');
 }
 
-export function addPlatform(data: Omit<Platform, 'id'>): Promise<Platform> {
-  return request<Platform>('/platforms', {
+export function addPlatform(data: Omit<IPlatform, 'id'>): Promise<IPlatform> {
+  return request<IPlatform>('/platforms', {
     method: 'POST',
     body: JSON.stringify(data),
   });
@@ -75,9 +75,9 @@ export function addPlatform(data: Omit<Platform, 'id'>): Promise<Platform> {
 
 export function updatePlatform(
   id: number,
-  data: Partial<Platform>,
-): Promise<Platform> {
-  return request<Platform>(`/platforms/${id}`, {
+  data: Partial<IPlatform>,
+): Promise<IPlatform> {
+  return request<IPlatform>(`/platforms/${id}`, {
     method: 'PUT',
     body: JSON.stringify(data),
   });
@@ -89,12 +89,12 @@ export function deletePlatform(id: number): Promise<void> {
 
 // ── Consoles ─────────────────────────────────────────────────────────────────
 
-export function getAllConsoles(): Promise<Console[]> {
-  return request<Console[]>('/consoles');
+export function getAllConsoles(): Promise<IConsole[]> {
+  return request<IConsole[]>('/consoles');
 }
 
-export function addConsole(data: Omit<Console, 'id'>): Promise<Console> {
-  return request<Console>('/consoles', {
+export function addConsole(data: Omit<IConsole, 'id'>): Promise<IConsole> {
+  return request<IConsole>('/consoles', {
     method: 'POST',
     body: JSON.stringify(data),
   });
@@ -102,9 +102,9 @@ export function addConsole(data: Omit<Console, 'id'>): Promise<Console> {
 
 export function updateConsole(
   id: number,
-  data: Partial<Console>,
-): Promise<Console> {
-  return request<Console>(`/consoles/${id}`, {
+  data: Partial<IConsole>,
+): Promise<IConsole> {
+  return request<IConsole>(`/consoles/${id}`, {
     method: 'PUT',
     body: JSON.stringify(data),
   });
@@ -116,12 +116,12 @@ export function deleteConsole(id: number): Promise<void> {
 
 // ── Accessories ──────────────────────────────────────────────────────────────
 
-export function getAllAccessories(): Promise<Accessory[]> {
-  return request<Accessory[]>('/accessories');
+export function getAllAccessories(): Promise<IAccessory[]> {
+  return request<IAccessory[]>('/accessories');
 }
 
-export function addAccessory(data: Omit<Accessory, 'id'>): Promise<Accessory> {
-  return request<Accessory>('/accessories', {
+export function addAccessory(data: Omit<IAccessory, 'id'>): Promise<IAccessory> {
+  return request<IAccessory>('/accessories', {
     method: 'POST',
     body: JSON.stringify(data),
   });
@@ -129,9 +129,9 @@ export function addAccessory(data: Omit<Accessory, 'id'>): Promise<Accessory> {
 
 export function updateAccessory(
   id: number,
-  data: Partial<Accessory>,
-): Promise<Accessory> {
-  return request<Accessory>(`/accessories/${id}`, {
+  data: Partial<IAccessory>,
+): Promise<IAccessory> {
+  return request<IAccessory>(`/accessories/${id}`, {
     method: 'PUT',
     body: JSON.stringify(data),
   });

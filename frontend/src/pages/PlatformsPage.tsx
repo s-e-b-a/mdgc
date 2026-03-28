@@ -1,10 +1,10 @@
-import { useState } from 'react';
 import {
   usePlatforms,
   useAddPlatform,
   useUpdatePlatform,
   useDeletePlatform,
 } from '@/hooks/usePlatforms';
+import { useInventoryStore } from '@/stores/useInventoryStore';
 import { Button } from '@/components/ui/button';
 import {
   Table,
@@ -25,7 +25,6 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import PlatformDialog from '@/components/PlatformDialog';
-import type { Platform } from '@/types';
 import { cn } from '@/lib/utils';
 import { Plus, Pencil, Trash2, RefreshCw } from 'lucide-react';
 
@@ -35,22 +34,34 @@ export default function PlatformsPage() {
   const updateMutation = useUpdatePlatform();
   const deleteMutation = useDeletePlatform();
 
-  const [selectedPlatform, setSelectedPlatform] = useState<Platform | null>(null);
-  const [dialogOpen, setDialogOpen] = useState(false);
-  const [editMode, setEditMode] = useState(false);
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [errorDialogOpen, setErrorDialogOpen] = useState(false);
-  const [errorMessage, setErrorMessage] = useState('');
+  // Zustand store state & actions
+  const {
+    selectedPlatform,
+    formDialogOpen: dialogOpen,
+    editMode,
+    deleteDialogOpen,
+    errorDialogOpen,
+    errorMessage,
+  } = useInventoryStore((s) => s.platforms);
+
+  const {
+    setSelectedPlatform,
+    setPlatformDialogOpen,
+    setPlatformEditMode,
+    setPlatformDeleteDialogOpen,
+    setPlatformErrorDialog,
+    resetPlatformSelection,
+  } = useInventoryStore();
 
   const handleAdd = () => {
-    setEditMode(false);
-    setDialogOpen(true);
+    setPlatformEditMode(false);
+    setPlatformDialogOpen(true);
   };
 
   const handleEdit = () => {
     if (!selectedPlatform) return;
-    setEditMode(true);
-    setDialogOpen(true);
+    setPlatformEditMode(true);
+    setPlatformDialogOpen(true);
   };
 
   const handleSave = (name: string) => {
@@ -59,8 +70,8 @@ export default function PlatformsPage() {
         { id: selectedPlatform.id, data: { name } },
         {
           onSuccess: () => {
-            setDialogOpen(false);
-            setSelectedPlatform(null);
+            setPlatformDialogOpen(false);
+            resetPlatformSelection();
           },
         }
       );
@@ -69,7 +80,7 @@ export default function PlatformsPage() {
         { name },
         {
           onSuccess: () => {
-            setDialogOpen(false);
+            setPlatformDialogOpen(false);
           },
         }
       );
@@ -80,13 +91,12 @@ export default function PlatformsPage() {
     if (!selectedPlatform) return;
     deleteMutation.mutate(selectedPlatform.id, {
       onSuccess: () => {
-        setDeleteDialogOpen(false);
-        setSelectedPlatform(null);
+        setPlatformDeleteDialogOpen(false);
+        resetPlatformSelection();
       },
       onError: () => {
-        setDeleteDialogOpen(false);
-        setErrorMessage('Ensure no games/hardware are linked to it.');
-        setErrorDialogOpen(true);
+        setPlatformDeleteDialogOpen(false);
+        setPlatformErrorDialog(true, 'Ensure no games/hardware are linked to it.');
       },
     });
   };
@@ -118,7 +128,7 @@ export default function PlatformsPage() {
           variant="destructive"
           size="sm"
           disabled={!selectedPlatform}
-          onClick={() => setDeleteDialogOpen(true)}
+          onClick={() => setPlatformDeleteDialogOpen(true)}
         >
           <Trash2 className="h-4 w-4" />
           Delete Platform
@@ -174,13 +184,13 @@ export default function PlatformsPage() {
       {/* Add/Edit Dialog */}
       <PlatformDialog
         open={dialogOpen}
-        onOpenChange={setDialogOpen}
+        onOpenChange={setPlatformDialogOpen}
         onSave={handleSave}
         platform={editMode ? selectedPlatform : null}
       />
 
       {/* Delete Confirmation */}
-      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setPlatformDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Confirm</AlertDialogTitle>
@@ -198,14 +208,14 @@ export default function PlatformsPage() {
       </AlertDialog>
 
       {/* Error Dialog */}
-      <AlertDialog open={errorDialogOpen} onOpenChange={setErrorDialogOpen}>
+      <AlertDialog open={errorDialogOpen} onOpenChange={(open) => setPlatformErrorDialog(open)}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Error</AlertDialogTitle>
             <AlertDialogDescription>{errorMessage}</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogAction onClick={() => setErrorDialogOpen(false)}>
+            <AlertDialogAction onClick={() => setPlatformErrorDialog(false)}>
               OK
             </AlertDialogAction>
           </AlertDialogFooter>

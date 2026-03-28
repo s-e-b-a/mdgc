@@ -5,7 +5,7 @@ import {
   updatePlatform,
   deletePlatform,
 } from '@/lib/api';
-import type { Platform } from '@/types';
+import type { IPlatform } from '@/types';
 
 const PLATFORMS_KEY = ['platforms'] as const;
 
@@ -19,7 +19,7 @@ export function usePlatforms() {
 export function useAddPlatform() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (data: Omit<Platform, 'id'>) => addPlatform(data),
+    mutationFn: (data: Omit<IPlatform, 'id'>) => addPlatform(data),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: PLATFORMS_KEY });
     },
@@ -29,7 +29,7 @@ export function useAddPlatform() {
 export function useUpdatePlatform() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, data }: { id: number; data: Partial<Platform> }) =>
+    mutationFn: ({ id, data }: { id: number; data: Partial<IPlatform> }) =>
       updatePlatform(id, data),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: PLATFORMS_KEY });

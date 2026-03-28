@@ -10,13 +10,13 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import type { Platform } from '@/types';
+import type { IPlatform } from '@/types';
 
 interface PlatformDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onSave: (name: string) => void;
-  platform?: Platform | null;
+  platform?: IPlatform | null;
 }
 
 export default function PlatformDialog({
