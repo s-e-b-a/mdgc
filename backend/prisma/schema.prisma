@@ -1,0 +1,71 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Platform {
+  id         Int         @id @default(autoincrement())
+  name       String
+  videoGames VideoGame[]
+  consoles   Console[]
+
+  @@map("platforms")
+}
+
+model VideoGame {
+  id              Int       @id @default(autoincrement())
+  title           String
+  platformId      Int       @map("platform_id")
+  format          String?
+  completeness    String?
+  region          String?
+  storeOrigin     String?   @map("store_origin")
+  purchasePrice   Float     @default(0) @map("purchase_price")
+  acquisitionDate DateTime? @map("acquisition_date")
+  playState       String?   @map("play_state")
+  platform        Platform  @relation(fields: [platformId], references: [id])
+
+  @@map("videogames")
+}
+
+model Console {
+  id              Int       @id @default(autoincrement())
+  model           String
+  serialNumber    String?   @map("serial_number")
+  colorEdition    String?   @map("color_edition")
+  status          String?
+  storageCapacity String?   @map("storage_capacity")
+  includedCables  String?   @map("included_cables")
+  platformId      Int?      @map("platform_id")
+  platform        Platform? @relation(fields: [platformId], references: [id])
+
+  @@map("consoles")
+}
+
+model Accessory {
+  id           Int     @id @default(autoincrement())
+  type         String
+  brand        String?
+  connectivity String?
+
+  @@map("accessories")
+}
+
+model Loan {
+  id           Int     @id @default(autoincrement())
+  itemType     String  @map("item_type")
+  itemId       Int     @map("item_id")
+  borrowerName String  @map("borrower_name")
+  loanDate     String  @map("loan_date")
+  returnDate   String? @map("return_date")
+  status       String
+
+  @@map("loans")
+}
