@@ -3,7 +3,7 @@ version: '3.8'
 services:
   db:
     image: mysql:8.0
-    container_name: inventory_db
+    container_name: nventory_db_j
     environment:
       MYSQL_ROOT_PASSWORD: root
       MYSQL_DATABASE: inventory
@@ -17,7 +17,7 @@ services:
 
   backend:
     image: tomcat:9.0-jre8
-    container_name: inventory_backend
+    container_name: inventory_backend_j
     ports:
       - "8080:8080"
     volumes:
@@ -26,22 +26,14 @@ services:
       - db
 
   frontend:
-    image: eclipse-temurin:8-jre
-    container_name: inventory_frontend
-    hostname: cachyos-x8664
-    ipc: host
+    build: ./frontend
+    container_name: inventory_frontend_j
     environment:
-      - DISPLAY=${DISPLAY}
       - BACKEND_HOST=backend
-      - XAUTHORITY=/tmp/xauth
-      - _JAVA_AWT_WM_NONREPARENTING=1
+    ports:
+      - "6080:6080"
     volumes:
-      - /tmp/.X11-unix:/tmp/.X11-unix:rw
-      - ${XAUTHORITY:-/tmp/null}:/tmp/xauth:ro
       - ./frontend/target:/app/target:ro
-    working_dir: /app
-    command: >
-      sh -c "apt-get update && apt-get install -y libxext6 libxrender1 libxtst6 libxi6 libx11-6 fontconfig && java -Djava.awt.headless=false -jar target/inventory-frontend-1.0-SNAPSHOT.jar"
     depends_on:
       - backend
 
