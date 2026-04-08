@@ -1,4 +1,15 @@
 -- =========================================================
+-- Gestión de Limpieza (Idempotencia)
+-- =========================================================
+SET FOREIGN_KEY_CHECKS = 0;
+DROP TABLE IF EXISTS loans;
+DROP TABLE IF EXISTS accessories;
+DROP TABLE IF EXISTS consoles;
+DROP TABLE IF EXISTS videogames;
+DROP TABLE IF EXISTS platforms;
+SET FOREIGN_KEY_CHECKS = 1;
+
+-- =========================================================
 -- Tabla: platforms
 -- =========================================================
 CREATE TABLE platforms (
@@ -104,3 +115,38 @@ CREATE INDEX idx_loans_borrower
 
 CREATE INDEX idx_loans_status
     ON loans(status);
+
+-- =========================================================
+-- Datos de ejemplo (Seed Data)
+-- =========================================================
+
+-- Platforms
+INSERT INTO platforms (id, name) VALUES 
+(1, 'PlayStation 5'),
+(2, 'Nintendo Switch'),
+(3, 'PC'),
+(4, 'Xbox Series X'),
+(5, 'Nintendo 64');
+
+-- VideoGames
+INSERT INTO videogames (title, platform_id, format, completeness, region, store_origin, purchase_price, acquisition_date, play_state) VALUES 
+('Elden Ring', 1, 'Físico', 'Nuevo', 'NTSC', 'Amazon', 59.99, '2024-03-01 10:00:00', 'Jugando'),
+('The Legend of Zelda: Tears of the Kingdom', 2, 'Físico', 'CIB', 'NTSC', 'Best Buy', 69.99, '2023-05-12 09:00:00', 'Completado'),
+('Counter-Strike 2', 3, 'Digital', 'N/A', 'Todas', 'Steam', 0.00, '2023-09-27 15:00:00', 'Jugando'),
+('Super Mario 64', 5, 'Físico', 'Solo cartucho', 'NTSC', 'Mercado Libre', 45.00, '2022-11-20 12:00:00', 'Pendiente');
+
+-- Consoles
+INSERT INTO consoles (model, serial_number, color_edition, status, storage_capacity, included_cables, platform_id) VALUES 
+('PS5 Standard', 'AK123456789', 'Blanco', 'Funcional', '825GB', 'HDMI, Power, USB-C', 1),
+('Nintendo Switch OLED', 'XJW1000234', 'Neon', 'Funcional', '64GB', 'HDMI, Power', 2);
+
+-- Accessories
+INSERT INTO accessories (type, brand, connectivity) VALUES 
+('DualSense Controller', 'Sony', 'Bluetooth'),
+('Pro Controller', 'Nintendo', 'Bluetooth'),
+('Logitech G Pro Mouse', 'Logitech', 'Alámbrico');
+
+-- Loans
+INSERT INTO loans (item_type, item_id, borrower_name, loan_date, status) VALUES 
+('VideoGame', 1, 'Juan Pérez', '2024-04-01', 'Prestado'),
+('Console', 1, 'María García', '2024-03-15', 'Prestado');
