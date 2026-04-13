@@ -1,6 +1,6 @@
 package cl.inventory.service;
 
-import javax.jws.WebService;
+import jakarta.jws.WebService;
 import java.util.ArrayList;
 import java.util.List;
 import cl.inventory.model.VideoGame;
