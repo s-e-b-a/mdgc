@@ -1,9 +1,9 @@
 package cl.inventory;
 
 import javax.xml.namespace.QName;
-import javax.xml.ws.Service;
+import jakarta.xml.ws.Service;
 import cl.inventory.service.InventoryService;
-import javax.xml.ws.BindingProvider;
+import jakarta.xml.ws.BindingProvider;
 
 public class TestClient {
     public static void main(String[] args) {

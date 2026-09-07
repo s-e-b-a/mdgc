@@ -11,7 +11,7 @@ import java.awt.*;
 import java.net.URL;
 import java.util.List;
 import javax.xml.namespace.QName;
-import javax.xml.ws.Service;
+import jakarta.xml.ws.Service;
 
 import cl.inventory.service.InventoryService;
 import cl.inventory.model.VideoGame;
@@ -76,8 +76,8 @@ public class MainFrame extends JXFrame {
             QName qname = new QName("http://service.inventory.cl/", "InventoryServiceImplService");
             Service wsService = Service.create(url, qname);
             service = wsService.getPort(InventoryService.class);
-            javax.xml.ws.BindingProvider bp = (javax.xml.ws.BindingProvider) service;
-            bp.getRequestContext().put(javax.xml.ws.BindingProvider.ENDPOINT_ADDRESS_PROPERTY, "http://" + bHost + ":8080/inventory/ws/inventory");
+            jakarta.xml.ws.BindingProvider bp = (jakarta.xml.ws.BindingProvider) service;
+            bp.getRequestContext().put(jakarta.xml.ws.BindingProvider.ENDPOINT_ADDRESS_PROPERTY, "http://" + bHost + ":8080/inventory/ws/inventory");
         } catch (Exception e) {
             e.printStackTrace();
             System.err.println("Backend is not ready yet, working in offline mode.");

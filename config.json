@@ -1,0 +1,7 @@
+{
+    "codeRepositoryPath": "/home/if/Code/tf/j12/frontend",
+    "transformationName": "AWS/java-version-upgrade",
+    "buildCommand": "mvn clean package",
+    "validationCommands": "mvn test",
+    "additionalPlanContext": "Upgrade this Java 8 Swing desktop application to Java 21. The application uses Swing/AWT and is not a web application. Preserve all Swing UI behavior, update dependencies and Maven plugins to Java 21 compatible versions, replace removed Java 8 APIs if necessary, and keep the project compatible with a fat JAR desktop application."
+}

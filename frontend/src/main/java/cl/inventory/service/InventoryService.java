@@ -1,7 +1,7 @@
 package cl.inventory.service;
 
-import javax.jws.WebMethod;
-import javax.jws.WebService;
+import jakarta.jws.WebMethod;
+import jakarta.jws.WebService;
 import java.util.List;
 import cl.inventory.model.VideoGame;
 import cl.inventory.model.Console;
