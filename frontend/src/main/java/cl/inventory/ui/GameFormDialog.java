@@ -16,7 +16,7 @@ public class GameFormDialog extends JDialog {
     private JTextField storeField;
     private JTextField priceField;
     private JTextField dateField;
-    private JComboBox<String> stateCombo;
+    private JTextField genreField;
 
     private boolean approved = false;
     private VideoGame resultGame;
@@ -39,6 +39,10 @@ public class GameFormDialog extends JDialog {
         formPanel.add(new JLabel("Platform*:"));
         platformCombo = new JComboBox<>(platforms.toArray(new Platform[0]));
         formPanel.add(platformCombo);
+
+        formPanel.add(new JLabel("Genre:"));
+        genreField = new JTextField();
+        formPanel.add(genreField);
 
         formPanel.add(new JLabel("Format:"));
         formatCombo = new JComboBox<>(new String[]{"Physical", "Digital"});
@@ -64,10 +68,6 @@ public class GameFormDialog extends JDialog {
         dateField = new JTextField();
         formPanel.add(dateField);
 
-        formPanel.add(new JLabel("Play State:"));
-        stateCombo = new JComboBox<>(new String[]{"Unplayed", "Playing", "Beaten", "Completed", "Abandoned"});
-        formPanel.add(stateCombo);
-
         add(formPanel, BorderLayout.CENTER);
 
         if (existing != null) {
@@ -78,13 +78,13 @@ public class GameFormDialog extends JDialog {
                     break;
                 }
             }
+            if(existing.getGenre() != null) genreField.setText(existing.getGenre());
             if(existing.getFormat() != null) formatCombo.setSelectedItem(existing.getFormat());
             if(existing.getCompleteness() != null) completenessCombo.setSelectedItem(existing.getCompleteness());
             if(existing.getRegion() != null) regionCombo.setSelectedItem(existing.getRegion());
             if(existing.getStoreOrigin() != null) storeField.setText(existing.getStoreOrigin());
             priceField.setText(String.valueOf(existing.getPurchasePrice()));
             if(existing.getAcquisitionDate() != null) dateField.setText(existing.getAcquisitionDate());
-            if(existing.getPlayState() != null) stateCombo.setSelectedItem(existing.getPlayState());
             this.resultGame = existing;
         }
 
@@ -114,6 +114,7 @@ public class GameFormDialog extends JDialog {
         if (resultGame == null) resultGame = new VideoGame();
         resultGame.setTitle(titleField.getText().trim());
         resultGame.setPlatformId(((Platform) platformCombo.getSelectedItem()).getId());
+        resultGame.setGenre(genreField.getText().trim());
         resultGame.setFormat(formatCombo.getSelectedItem().toString());
         resultGame.setCompleteness(completenessCombo.getSelectedItem().toString());
         resultGame.setRegion(regionCombo.getSelectedItem().toString());
@@ -124,7 +125,6 @@ public class GameFormDialog extends JDialog {
             resultGame.setPurchasePrice(0.0);
         }
         resultGame.setAcquisitionDate(dateField.getText().trim());
-        resultGame.setPlayState(stateCombo.getSelectedItem().toString());
     }
 
     public boolean isApproved() {

@@ -15,6 +15,7 @@ import jakarta.xml.ws.Service;
 
 import cl.inventory.service.InventoryService;
 import cl.inventory.model.VideoGame;
+import cl.inventory.model.VideoGameRating;
 import cl.inventory.model.Platform;
 import cl.inventory.model.Accessory;
 import cl.inventory.model.Console;
@@ -37,6 +38,8 @@ public class MainFrame extends JXFrame {
     private List<Platform> currentPlatforms;
     private List<Accessory> currentAccessories;
     private List<Console> currentConsoles;
+    private List<VideoGameRating> currentRatings;
+    private java.util.Map<Integer, VideoGameRating> ratingByGameId = new java.util.HashMap<>();
 
     public MainFrame() {
         super("Slam's Video Game Inventory", true);
@@ -127,6 +130,23 @@ public class MainFrame extends JXFrame {
                     try { service.deleteVideoGame(sel.getId()); loadData(); } catch(Exception ex) { ex.printStackTrace(); }
                 }
             }
+        });
+        gamePane.add(new AbstractAction("Edit Rating / Progress") {
+            @Override public void actionPerformed(java.awt.event.ActionEvent e) {
+                if(service == null || currentGames == null) return;
+                int row = gameTable.getSelectedRow();
+                if(row < 0) { JOptionPane.showMessageDialog(MainFrame.this, "Select a game first."); return; }
+                VideoGame sel = currentGames.get(gameTable.convertRowIndexToModel(row));
+                try {
+                    VideoGameRating existing = service.getRatingForGame(sel.getId());
+                    RatingFormDialog dialog = new RatingFormDialog(MainFrame.this, sel, existing);
+                    dialog.setVisible(true);
+                    if (dialog.isApproved()) { service.saveRating(dialog.getResultRating()); loadData(); }
+                } catch(Exception ex) { ex.printStackTrace(); }
+            }
+        });
+        gamePane.add(new AbstractAction("Export Ratings CSV") {
+            @Override public void actionPerformed(java.awt.event.ActionEvent e) { exportRatingsCsv(); }
         });
         
         // --- PLATFORMS PANE ---
@@ -275,7 +295,7 @@ public class MainFrame extends JXFrame {
         
         // 2. Games Tab
         JPanel gamePanel = new JPanel(new BorderLayout());
-        String[] columns = {"ID", "Title", "Platform", "Format", "State"};
+        String[] columns = {"ID", "Title", "Platform", "Genre", "Format", "Rating"};
         gameTableModel = new DefaultTableModel(columns, 0);
         gameTable = new JXTable(gameTableModel); gameTable.setColumnControlVisible(true); gameTable.packAll();
         gamePanel.add(new JScrollPane(gameTable), BorderLayout.CENTER);
@@ -325,6 +345,7 @@ public class MainFrame extends JXFrame {
             private List<Platform> platforms;
             private List<Accessory> accessories;
             private List<Console> consoles;
+            private List<VideoGameRating> ratings;
             private String reportText;
 
             @Override
@@ -333,6 +354,11 @@ public class MainFrame extends JXFrame {
                 platforms = service.getAllPlatforms();
                 accessories = service.getAllAccessories();
                 consoles = service.getAllConsoles();
+                try {
+                    ratings = service.getAllRatings();
+                } catch(Exception e) {
+                    ratings = null;
+                }
                 try {
                     reportText = service.getStatisticsReport();
                 } catch(Exception e) {
@@ -344,9 +370,18 @@ public class MainFrame extends JXFrame {
             @Override
             protected void done() {
                 try {
+                    currentRatings = ratings;
+                    ratingByGameId.clear();
+                    if (ratings != null) {
+                        for (VideoGameRating r : ratings) { ratingByGameId.put(r.getVideoGameId(), r); }
+                    }
                     if (games != null) {
                         currentGames = games; gameTableModel.setRowCount(0);
-                        for (VideoGame g : games) { gameTableModel.addRow(new Object[]{ g.getId(), g.getTitle(), g.getPlatform(), g.getFormat(), g.getPlayState() }); }
+                        for (VideoGame g : games) {
+                            VideoGameRating r = ratingByGameId.get(g.getId());
+                            String ratingCell = (r != null && r.getRating() != null) ? (r.getRating() + "/5") : "";
+                            gameTableModel.addRow(new Object[]{ g.getId(), g.getTitle(), g.getPlatform(), g.getGenre(), g.getFormat(), ratingCell });
+                        }
                         gameTable.packAll();
                     }
                     if (platforms != null) {
@@ -368,6 +403,59 @@ public class MainFrame extends JXFrame {
                         dashboardArea.setText(reportText);
                     }
                 } catch (Exception e) { e.printStackTrace(); }
+            }
+        }.execute();
+    }
+
+    private String csvEscape(String value) {
+        if (value == null) return "";
+        boolean needsQuotes = value.contains(",") || value.contains("\"") || value.contains("\n") || value.contains("\r");
+        String escaped = value.replace("\"", "\"\"");
+        return needsQuotes ? "\"" + escaped + "\"" : escaped;
+    }
+
+    private void exportRatingsCsv() {
+        if (service == null) { JOptionPane.showMessageDialog(this, "Backend no disponible."); return; }
+
+        new SwingWorker<java.util.List<VideoGameRating>, Void>() {
+            @Override
+            protected java.util.List<VideoGameRating> doInBackground() throws Exception {
+                return service.getAllRatings();
+            }
+
+            @Override
+            protected void done() {
+                try {
+                    java.util.List<VideoGameRating> ratings = get();
+                    if (ratings == null) ratings = new java.util.ArrayList<>();
+
+                    JFileChooser chooser = new JFileChooser();
+                    chooser.setDialogTitle("Exportar ratings a CSV");
+                    chooser.setSelectedFile(new java.io.File("ratings.csv"));
+                    if (chooser.showSaveDialog(MainFrame.this) != JFileChooser.APPROVE_OPTION) return;
+
+                    java.io.File file = chooser.getSelectedFile();
+                    try (java.io.PrintWriter pw = new java.io.PrintWriter(
+                            new java.io.OutputStreamWriter(new java.io.FileOutputStream(file), java.nio.charset.StandardCharsets.UTF_8))) {
+                        pw.println("Juego,Plataforma,Rating,Completado,AvancePct,VecesTerminado,UltimaVezJugado,Comentario");
+                        for (VideoGameRating r : ratings) {
+                            StringBuilder line = new StringBuilder();
+                            line.append(csvEscape(r.getGameTitle())).append(',');
+                            line.append(csvEscape(r.getPlatformName())).append(',');
+                            line.append(r.getRating() != null ? r.getRating().toString() : "").append(',');
+                            line.append(r.isCompleted() ? "Sí" : "No").append(',');
+                            line.append(r.getProgressPercent()).append(',');
+                            line.append(r.getTimesCompleted()).append(',');
+                            line.append(csvEscape(r.getLastPlayed())).append(',');
+                            line.append(csvEscape(r.getComment()));
+                            pw.println(line.toString());
+                        }
+                    }
+                    JOptionPane.showMessageDialog(MainFrame.this, "Exportados " + ratings.size() + " ratings a:\n" + file.getAbsolutePath());
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                    JOptionPane.showMessageDialog(MainFrame.this, "Error al exportar el CSV: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                }
             }
         }.execute();
     }

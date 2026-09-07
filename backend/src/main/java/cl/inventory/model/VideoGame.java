@@ -9,13 +9,13 @@ public class VideoGame implements Serializable {
     private String title;
     private int platformId;
     private String platform;
+    private String genre;
     private String format;
     private String completeness;
     private String region;
     private String storeOrigin;
     private double purchasePrice;
     private String acquisitionDate;
-    private String playState;
 
     public int getId() { return id; }
     public void setId(int id) { this.id = id; }
@@ -28,6 +28,9 @@ public class VideoGame implements Serializable {
 
     public String getPlatform() { return platform; }
     public void setPlatform(String platform) { this.platform = platform; }
+
+    public String getGenre() { return genre; }
+    public void setGenre(String genre) { this.genre = genre; }
 
     public String getFormat() { return format; }
     public void setFormat(String format) { this.format = format; }
@@ -46,7 +49,4 @@ public class VideoGame implements Serializable {
 
     public String getAcquisitionDate() { return acquisitionDate; }
     public void setAcquisitionDate(String acquisitionDate) { this.acquisitionDate = acquisitionDate; }
-
-    public String getPlayState() { return playState; }
-    public void setPlayState(String playState) { this.playState = playState; }
 }

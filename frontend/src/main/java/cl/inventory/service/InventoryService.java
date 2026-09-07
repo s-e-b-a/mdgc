@@ -4,6 +4,7 @@ import jakarta.jws.WebMethod;
 import jakarta.jws.WebService;
 import java.util.List;
 import cl.inventory.model.VideoGame;
+import cl.inventory.model.VideoGameRating;
 import cl.inventory.model.Console;
 import cl.inventory.model.Accessory;
 import cl.inventory.model.Platform;
@@ -66,4 +67,13 @@ public interface InventoryService {
     
     @WebMethod
     String getStatisticsReport();
+
+    @WebMethod
+    VideoGameRating getRatingForGame(int videoGameId);
+
+    @WebMethod
+    List<VideoGameRating> getAllRatings();
+
+    @WebMethod
+    void saveRating(VideoGameRating rating);
 }

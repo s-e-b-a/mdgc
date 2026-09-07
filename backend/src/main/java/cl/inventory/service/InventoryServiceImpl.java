@@ -4,6 +4,7 @@ import jakarta.jws.WebService;
 import java.util.ArrayList;
 import java.util.List;
 import cl.inventory.model.VideoGame;
+import cl.inventory.model.VideoGameRating;
 import cl.inventory.model.Console;
 import cl.inventory.model.Accessory;
 import cl.inventory.model.Platform;
@@ -45,6 +46,7 @@ public class InventoryServiceImpl implements InventoryService {
                  vg.setTitle(rs.getString("title"));
                  vg.setPlatformId(rs.getInt("platform_id"));
                  vg.setPlatform(rs.getString("platform_name"));
+                 vg.setGenre(rs.getString("genre"));
                  vg.setFormat(rs.getString("format"));
                  vg.setCompleteness(rs.getString("completeness"));
                  vg.setRegion(rs.getString("region"));
@@ -54,7 +56,6 @@ public class InventoryServiceImpl implements InventoryService {
                  if(d != null) {
                      vg.setAcquisitionDate(d.toString());
                  }
-                 vg.setPlayState(rs.getString("play_state"));
                  games.add(vg);
              }
         } catch (Exception e) {
@@ -67,20 +68,20 @@ public class InventoryServiceImpl implements InventoryService {
     public void addVideoGame(VideoGame game) {
         try (Connection conn = getConnection();
              PreparedStatement stmt = conn.prepareStatement(
-                "INSERT INTO videogames (title, platform_id, format, completeness, region, store_origin, purchase_price, acquisition_date, play_state) VALUES (?,?,?,?,?,?,?,?,?)")) {
+                "INSERT INTO videogames (title, platform_id, genre, format, completeness, region, store_origin, purchase_price, acquisition_date) VALUES (?,?,?,?,?,?,?,?,?)")) {
              stmt.setString(1, game.getTitle());
              stmt.setInt(2, game.getPlatformId());
-             stmt.setString(3, game.getFormat());
-             stmt.setString(4, game.getCompleteness());
-             stmt.setString(5, game.getRegion());
-             stmt.setString(6, game.getStoreOrigin());
-             stmt.setDouble(7, game.getPurchasePrice());
+             stmt.setString(3, game.getGenre());
+             stmt.setString(4, game.getFormat());
+             stmt.setString(5, game.getCompleteness());
+             stmt.setString(6, game.getRegion());
+             stmt.setString(7, game.getStoreOrigin());
+             stmt.setDouble(8, game.getPurchasePrice());
              if (game.getAcquisitionDate() != null && !game.getAcquisitionDate().isEmpty()) {
-                 stmt.setDate(8, java.sql.Date.valueOf(game.getAcquisitionDate()));
+                 stmt.setDate(9, java.sql.Date.valueOf(game.getAcquisitionDate()));
              } else {
-                 stmt.setNull(8, java.sql.Types.DATE);
+                 stmt.setNull(9, java.sql.Types.DATE);
              }
-             stmt.setString(9, game.getPlayState());
              stmt.executeUpdate();
         } catch (Exception e) {
             e.printStackTrace();
@@ -91,20 +92,20 @@ public class InventoryServiceImpl implements InventoryService {
     public void updateVideoGame(VideoGame game) {
         try (Connection conn = getConnection();
              PreparedStatement stmt = conn.prepareStatement(
-                "UPDATE videogames SET title=?, platform_id=?, format=?, completeness=?, region=?, store_origin=?, purchase_price=?, acquisition_date=?, play_state=? WHERE id=?")) {
+                "UPDATE videogames SET title=?, platform_id=?, genre=?, format=?, completeness=?, region=?, store_origin=?, purchase_price=?, acquisition_date=? WHERE id=?")) {
              stmt.setString(1, game.getTitle());
              stmt.setInt(2, game.getPlatformId());
-             stmt.setString(3, game.getFormat());
-             stmt.setString(4, game.getCompleteness());
-             stmt.setString(5, game.getRegion());
-             stmt.setString(6, game.getStoreOrigin());
-             stmt.setDouble(7, game.getPurchasePrice());
+             stmt.setString(3, game.getGenre());
+             stmt.setString(4, game.getFormat());
+             stmt.setString(5, game.getCompleteness());
+             stmt.setString(6, game.getRegion());
+             stmt.setString(7, game.getStoreOrigin());
+             stmt.setDouble(8, game.getPurchasePrice());
              if (game.getAcquisitionDate() != null && !game.getAcquisitionDate().isEmpty()) {
-                 stmt.setDate(8, java.sql.Date.valueOf(game.getAcquisitionDate()));
+                 stmt.setDate(9, java.sql.Date.valueOf(game.getAcquisitionDate()));
              } else {
-                 stmt.setNull(8, java.sql.Types.DATE);
+                 stmt.setNull(9, java.sql.Types.DATE);
              }
-             stmt.setString(9, game.getPlayState());
              stmt.setInt(10, game.getId());
              stmt.executeUpdate();
         } catch (Exception e) {
@@ -313,6 +314,124 @@ public class InventoryServiceImpl implements InventoryService {
         }
     }
 
+    private VideoGameRating mapRating(ResultSet rs) throws Exception {
+        VideoGameRating r = new VideoGameRating();
+        r.setId(rs.getInt("id"));
+        r.setVideoGameId(rs.getInt("videogame_id"));
+        int ratingVal = rs.getInt("rating");
+        if (rs.wasNull()) {
+            r.setRating(null);
+        } else {
+            r.setRating(ratingVal);
+        }
+        r.setComment(rs.getString("comment"));
+        r.setCompleted(rs.getBoolean("completed"));
+        r.setProgressPercent(rs.getInt("progress_percent"));
+        r.setTimesCompleted(rs.getInt("times_completed"));
+        java.sql.Date lp = rs.getDate("last_played");
+        if (lp != null) {
+            r.setLastPlayed(lp.toString());
+        }
+        return r;
+    }
+
+    @Override
+    public VideoGameRating getRatingForGame(int videoGameId) {
+        try (Connection conn = getConnection();
+             PreparedStatement stmt = conn.prepareStatement(
+                "SELECT r.*, v.title AS game_title, p.name AS platform_name " +
+                "FROM videogame_ratings r " +
+                "JOIN videogames v ON r.videogame_id = v.id " +
+                "LEFT JOIN platforms p ON v.platform_id = p.id " +
+                "WHERE r.videogame_id = ?")) {
+             stmt.setInt(1, videoGameId);
+             try (ResultSet rs = stmt.executeQuery()) {
+                 if (rs.next()) {
+                     VideoGameRating r = mapRating(rs);
+                     r.setGameTitle(rs.getString("game_title"));
+                     r.setPlatformName(rs.getString("platform_name"));
+                     return r;
+                 }
+             }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    @Override
+    public List<VideoGameRating> getAllRatings() {
+        List<VideoGameRating> list = new ArrayList<>();
+        try (Connection conn = getConnection();
+             PreparedStatement stmt = conn.prepareStatement(
+                "SELECT r.*, v.title AS game_title, p.name AS platform_name " +
+                "FROM videogame_ratings r " +
+                "JOIN videogames v ON r.videogame_id = v.id " +
+                "LEFT JOIN platforms p ON v.platform_id = p.id " +
+                "ORDER BY v.title");
+             ResultSet rs = stmt.executeQuery()) {
+             while (rs.next()) {
+                 VideoGameRating r = mapRating(rs);
+                 r.setGameTitle(rs.getString("game_title"));
+                 r.setPlatformName(rs.getString("platform_name"));
+                 list.add(r);
+             }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
+
+    @Override
+    public void saveRating(VideoGameRating rating) {
+        try (Connection conn = getConnection()) {
+            boolean exists = false;
+            try (PreparedStatement check = conn.prepareStatement(
+                    "SELECT id FROM videogame_ratings WHERE videogame_id = ?")) {
+                check.setInt(1, rating.getVideoGameId());
+                try (ResultSet rs = check.executeQuery()) {
+                    exists = rs.next();
+                }
+            }
+
+            if (exists) {
+                try (PreparedStatement stmt = conn.prepareStatement(
+                        "UPDATE videogame_ratings SET rating=?, comment=?, completed=?, progress_percent=?, times_completed=?, last_played=? WHERE videogame_id=?")) {
+                    bindRatingFields(stmt, rating);
+                    stmt.setInt(7, rating.getVideoGameId());
+                    stmt.executeUpdate();
+                }
+            } else {
+                try (PreparedStatement stmt = conn.prepareStatement(
+                        "INSERT INTO videogame_ratings (rating, comment, completed, progress_percent, times_completed, last_played, videogame_id) VALUES (?,?,?,?,?,?,?)")) {
+                    bindRatingFields(stmt, rating);
+                    stmt.setInt(7, rating.getVideoGameId());
+                    stmt.executeUpdate();
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void bindRatingFields(PreparedStatement stmt, VideoGameRating rating) throws Exception {
+        if (rating.getRating() != null) {
+            stmt.setInt(1, rating.getRating());
+        } else {
+            stmt.setNull(1, java.sql.Types.INTEGER);
+        }
+        stmt.setString(2, rating.getComment());
+        stmt.setBoolean(3, rating.isCompleted());
+        // Si está completado, el avance parcial no aplica: se fuerza a 100.
+        stmt.setInt(4, rating.isCompleted() ? 100 : rating.getProgressPercent());
+        stmt.setInt(5, rating.getTimesCompleted());
+        if (rating.getLastPlayed() != null && !rating.getLastPlayed().isEmpty()) {
+            stmt.setDate(6, java.sql.Date.valueOf(rating.getLastPlayed()));
+        } else {
+            stmt.setNull(6, java.sql.Types.DATE);
+        }
+    }
+
     @Override
     public double getTotalCollectionValue() {
         double val = 0;
@@ -353,9 +472,27 @@ public class InventoryServiceImpl implements InventoryService {
             try(PreparedStatement stmt = conn.prepareStatement("SELECT p.name, COUNT(v.id) FROM videogames v JOIN platforms p ON v.platform_id=p.id GROUP BY p.name"); ResultSet rs = stmt.executeQuery()) {
                 while(rs.next()) sb.append(String.format(" - %-20s : %d\n", rs.getString(1), rs.getInt(2)));
             }
-            sb.append("\n[Games by Play State]\n");
-            try(PreparedStatement stmt = conn.prepareStatement("SELECT play_state, COUNT(id) FROM videogames GROUP BY play_state"); ResultSet rs = stmt.executeQuery()) {
-                while(rs.next()) sb.append(String.format(" - %-20s : %d\n", rs.getString(1), rs.getInt(2)));
+            sb.append("\n[Top Completed Games (by times completed)]\n");
+            boolean anyCompleted = false;
+            try(PreparedStatement stmt = conn.prepareStatement(
+                    "SELECT v.title, r.times_completed FROM videogame_ratings r JOIN videogames v ON r.videogame_id = v.id WHERE r.times_completed > 0 ORDER BY r.times_completed DESC LIMIT 5");
+                ResultSet rs = stmt.executeQuery()) {
+                while(rs.next()) {
+                    anyCompleted = true;
+                    sb.append(String.format(" - %-30s : %d\n", rs.getString(1), rs.getInt(2)));
+                }
+            }
+            if (!anyCompleted) sb.append(" - (Aún no hay juegos terminados)\n");
+
+            sb.append("\n[Most Played Genre]\n");
+            try(PreparedStatement stmt = conn.prepareStatement(
+                    "SELECT v.genre, COUNT(*) AS c FROM videogames v WHERE v.genre IS NOT NULL AND v.genre <> '' GROUP BY v.genre ORDER BY c DESC LIMIT 1");
+                ResultSet rs = stmt.executeQuery()) {
+                if(rs.next()) {
+                    sb.append(String.format(" - %-20s : %d juego(s)\n", rs.getString(1), rs.getInt(2)));
+                } else {
+                    sb.append(" - (Sin géneros registrados)\n");
+                }
             }
         } catch (Exception e) {
             e.printStackTrace();
