@@ -1,13 +1,12 @@
 # mdgc
 my digital games collection
 
-
 --
 
-# build backend
+# Despliegue con Docker Compose
 
-nerdctl run --rm -v "$(pwd)/backend:/app" -w /app maven:3.9-eclipse-temurin-21 mvn clean package
+Para compilar e iniciar automáticamente el backend, el frontend y la base de datos:
 
-# build frontend
-
-nerdctl run --rm -v "$(pwd)/frontend:/app" -w /app maven:3.9-eclipse-temurin-21 mvn clean package
+```bash
+docker compose up --build
+```
